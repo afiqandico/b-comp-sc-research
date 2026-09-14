@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Pangimpian"
+    given-names: "Afiq Andico"
+    orcid: "https://orcid.org/0009-0002-1750-9551"
+title: "Campus Management Optimization via Classification (Marketing, HR, Operations) — ITB STIKOM Bali"
+abstract: "S1 thesis — data science classification (KNN, Random Forest, Decision Tree, SVM) on Orange Data Mining to optimize campus marketing, HR, and operational management."
+version: 1.0.0
+date-released: "2026-07-15"
+repository-code: "https://github.com/afiqandico/b-comp-sc-research"
+url: "https://github.com/afiqandico/b-comp-sc-research"
+license: MIT

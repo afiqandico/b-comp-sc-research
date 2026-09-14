@@ -1,0 +1,11 @@
+item,qty,unit_price,market_price,efficiency_label
+Computer,1,9000000,8013000,inefficient
+Laptop,1,4500000,2731300,inefficient
+CCTV,1,500000,333025,inefficient
+Ceramic,1,500000,550000,efficient
+HVS Paper,1,300000,319000,efficient
+Pens,100,5000,4500,efficient
+Markers,50,7500,7000,efficient
+Stapler,20,150000,140000,efficient
+Tape,30,20000,19000,efficient
+Binder Clip,500,2500,2400,efficient

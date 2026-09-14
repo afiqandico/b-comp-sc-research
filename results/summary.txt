@@ -1,0 +1,50 @@
+marketing: accuracy = 1.0
+              precision    recall  f1-score   support
+
+         Low       1.00      1.00      1.00         1
+        High       1.00      1.00      1.00         1
+
+    accuracy                           1.00         2
+   macro avg       1.00      1.00      1.00         2
+weighted avg       1.00      1.00      1.00         2
+
+
+
+hr: accuracy = 0.33
+              precision    recall  f1-score   support
+
+        Fair       0.00      0.00      0.00         1
+        Good       0.33      1.00      0.50         1
+   Excellent       0.00      0.00      0.00         1
+
+    accuracy                           0.33         3
+   macro avg       0.11      0.33      0.17         3
+weighted avg       0.11      0.33      0.17         3
+
+
+
+ops_svm: accuracy = 0.5
+              precision    recall  f1-score   support
+
+   efficient       0.50      1.00      0.67         1
+ inefficient       0.00      0.00      0.00         1
+
+    accuracy                           0.50         2
+   macro avg       0.25      0.50      0.33         2
+weighted avg       0.25      0.50      0.33         2
+
+Ops k-NN Accuracy: 0.50
+              precision    recall  f1-score   support
+
+ops_knn: accuracy = 0.5
+              precision    recall  f1-score   support
+
+   efficient       0.50      1.00      0.67         1
+ inefficient       0.00      0.00      0.00         1
+
+    accuracy                           0.50         2
+   macro avg       0.25      0.50      0.33         2
+weighted avg       0.25      0.50      0.33         2
+
+Ops k-NN Accuracy: 0.50
+              precision    recall  f1-score   support
