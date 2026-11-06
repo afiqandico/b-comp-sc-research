@@ -54,7 +54,32 @@ def fixture_rows():
     }
 
 
+def check_dependencies():
+    """Fail early with an actionable message instead of a traceback."""
+    missing = []
+    for module, package in (
+        ("pandas", "pandas"),
+        ("sklearn", "scikit-learn"),
+        ("matplotlib", "matplotlib"),
+    ):
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(package)
+    if missing:
+        print("Dependency check FAILED — modul belum terpasang: " + ", ".join(missing))
+        print("Jalankan dari virtualenv proyek:")
+        print("  python -m venv venv && source venv/bin/activate")
+        print("  pip install -r requirements.txt")
+        return False
+    return True
+
+
 def main():
+    if not check_dependencies():
+        print("Verification FAILED")
+        return 1
+
     output = run_demo()
     if output is None:
         print("Verification FAILED")
