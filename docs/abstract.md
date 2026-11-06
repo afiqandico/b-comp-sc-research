@@ -1,5 +1,10 @@
 ## Abstract
 
+> **Source note:** this is the thesis abstract as submitted. Its figures (94%, 77%, 82%,
+> 71%, 13.6%, IDR 2.3M) were computed on the full private dataset and are **not
+> reproducible from this repository**; the demo in this repo runs on 10–13 row synthetic
+> fixtures. See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md).
+
 In order to remain competitive, universities in the higher education sector must optimize data-driven management. The ITB STIKOM Bali Abiansemal Campus is facing challenges in improving marketing effectiveness, HR performance, and operational efficiency. This study uses data science classification methods (K-Nearest Neighbors, Random Forest, Decision Tree, and Support Vector Machine (SVM)) on the Orange Data Mining Platform to identify the dominant factors in these three areas. Data was collected from Instagram marketing campaigns, staff performance (productivity), and the purchase of goods and the operational budget. The results showed that, in the marketing field: Reels content increased engagement by 71% (model accuracy: 94%). HR: Absenteeism was the dominant factor in performance classification (77% accuracy); and operations: 13.6% of purchases were identified as inefficient (with the potential to save IDR 2.3 million per month). Implementing the Orange Data Mining dashboard provided strategic recommendations for: Reels-based marketing budget allocation, Focused staff training, Procurement cost savings. This research proves the effectiveness of Orange Data Mining as an integrated, nontechnical analytics solution for universities.
 
 Keywords: Marketing Management, Human Resources, Operational Efficiency, Data Science, Classification, Orange Platform, ITB STIKOM Bali.

@@ -21,6 +21,11 @@
 - The final result is the average across folds.
 - Visualization: confusion matrix, ROC curve, feature importance, scatter plot, heatmap.
 
+> **Implementation note:** the scripts in `workflows/` re-implement the models but use a
+> single seeded 80/20 split, not 5-fold cross-validation. They are a demonstration of the
+> pipeline, and their output on the 10–13 row fixtures cannot reproduce the figures in the
+> Results section below. See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md).
+
 **Integration & Recommendations**
 The classification results are used as the basis for:
 - *Content Calendar* (marketing): scheduling Reels content by effective days and hours.
@@ -32,6 +37,11 @@ The classification results are used as the basis for:
 - The research has obtained permission from the relevant institution (Appendix 11 Research Permit Letter).
 
 ## Results
+
+> **Source note:** every figure in this section is the thesis result, computed on the full
+> private dataset with 5-fold cross-validation. It is **not** produced by this repository
+> and cannot be regenerated from `data/`. The repository's own measured output (fixture
+> smoke test) is in [`results.md`](results.md) Part A and [`DEMO_OUTPUT.txt`](DEMO_OUTPUT.txt).
 
 ### 4.3 Classification Results per Domain
 
@@ -99,4 +109,4 @@ This research proves that a data science approach with the Orange Data Mining pl
 5. **Continuous Audit and Monitoring** – Create a monthly audit SOP to ensure the efficiency threshold (110% of market price) continues to be applied and that model drift does not occur.
 
 ---
-*Note: The figures above are the results of the actual, anonymized data analysis. For full reproduction, refer to `workflows/*.py` and `scripts/demo.py`, which contain the same code as exported from Orange Data Mining.*
+*Note: the figures above are the thesis results computed on the full anonymized dataset with 5-fold cross-validation. They are not reproducible from this repository, which ships only 10–13 row synthetic fixtures and a single 80/20 split. See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md).*
