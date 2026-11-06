@@ -1,83 +1,125 @@
 # scripts/demo.py
-# Runs the three workflow scripts and prints results.
-# Also saves metrics to results/ folder.
+"""Run the three classification workflows and print their measured metrics.
 
+Every number printed or written to results/ is computed at run time from the
+CSV fixtures in data/. Nothing is hard-coded, and no accuracy figure from the
+thesis is reproduced here: the fixtures are tiny synthetic samples.
+
+Usage:
+    python scripts/demo.py
+"""
+
+import json
+import os
+import re
 import subprocess
 import sys
-import os
-import json
-from sklearn.metrics import accuracy_score, classification_report
+
 import pandas as pd
 
-def run_script_and_capture(script_path):
-    print(f'Running {script_path}...')
-    result = subprocess.run([sys.executable, script_path], capture_output=True, text=True)
+BASE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(BASE)
+RESULTS_DIR = os.path.join(REPO, "results")
+
+ACCURACY_RE = re.compile(
+    r"^(?P<label>[A-Za-z][A-Za-z0-9 /-]*?)\s+Accuracy:\s*(?P<value>[0-9]*\.?[0-9]+)\s*$",
+    re.MULTILINE,
+)
+
+# script -> [(result key, "Label" prefix of the accuracy line)]
+WORKFLOWS = [
+    ("marketing_reels.py", [("marketing", "Marketing Random Forest")]),
+    ("hr_decision_tree.py", [("hr", "HR Decision Tree")]),
+    ("ops_svm_knn.py", [("ops_svm", "Ops SVM"), ("ops_knn", "Ops k-NN")]),
+]
+
+DATASETS = [
+    ("marketing", "marketing_sample.csv"),
+    ("hr", "hr_sample.csv"),
+    ("ops", "ops_sample.csv"),
+]
+
+
+def run_script(filename):
+    """Run one workflow, returning (stdout, stderr)."""
+    path = os.path.join(REPO, "workflows", filename)
+    result = subprocess.run(
+        [sys.executable, path], capture_output=True, text=True, cwd=REPO
+    )
     if result.returncode != 0:
-        print(f'Error running {script_path}:')
-        print(result.stderr)
-        return None
-    else:
-        print(result.stdout)
-        return result.stdout
+        raise RuntimeError(
+            f"{filename} exited with code {result.returncode}\n{result.stderr}"
+        )
+    return result.stdout, result.stderr
 
-def extract_accuracy_and_report(output, model_name):
-    # Parse output to get accuracy and report
-    lines = output.split('\n')
-    acc_line = [l for l in lines if f'{model_name} Accuracy:' in l]
-    if acc_line:
-        acc = float(acc_line[0].split(':')[1].strip())
-    else:
-        acc = None
-    # Find classification report lines (simplistic: look for 'precision' line)
-    report_lines = []
-    capture = False
-    for l in lines:
-        if 'precision' in l and 'recall' in l and 'f1-score' in l:
-            capture = True
-        if capture:
-            report_lines.append(l)
-            if len(report_lines) > 10:  # stop after a few lines
-                break
-    report = '\n'.join(report_lines) if report_lines else ''
-    return acc, report
 
-if __name__ == '__main__':
-    base = os.path.dirname(os.path.abspath(__file__))
-    workflows = [
-        ('Marketing Random Forest', os.path.join(base, '../workflows/marketing_reels.py')),
-        ('HR Decision Tree', os.path.join(base, '../workflows/hr_decision_tree.py')),
-        ('Ops SVM', os.path.join(base, '../workflows/ops_svm_knn.py')),
-        ('Ops k-NN', os.path.join(base, '../workflows/ops_svm_knn.py'))  # same file prints both
-    ]
-    results = {}
-    for name, script in workflows:
-        out = run_script_and_capture(script)
-        if out is None:
+def parse_accuracies(output):
+    """Map every '<label> Accuracy: <float>' line in the output to a float."""
+    return {
+        match.group("label"): float(match.group("value"))
+        for match in ACCURACY_RE.finditer(output)
+    }
+
+
+def extract_report(output, label):
+    """Return the text block that follows a given accuracy line."""
+    matches = list(ACCURACY_RE.finditer(output))
+    for index, match in enumerate(matches):
+        if match.group("label") != label:
             continue
-        # Determine model name for extraction
-        if 'Marketing' in name:
-            acc, report = extract_accuracy_and_report(out, 'Marketing Random Forest')
-            results['marketing'] = {'accuracy': acc, 'report': report}
-        elif 'HR' in name:
-            acc, report = extract_accuracy_and_report(out, 'HR Decision Tree')
-            results['hr'] = {'accuracy': acc, 'report': report}
-        elif 'SVM' in name:
-            acc, report = extract_accuracy_and_report(out, 'Ops SVM')
-            results['ops_svm'] = {'accuracy': acc, 'report': report}
-        elif 'k-NN' in name:
-            acc, report = extract_accuracy_and_report(out, 'Ops k-NN')
-            results['ops_knn'] = {'accuracy': acc, 'report': report}
-    # Save results
-    os.makedirs(os.path.join(base, '../results'), exist_ok=True)
-    with open(os.path.join(base, '../results/metrics.json'), 'w') as f:
-        json.dump(results, f, indent=2)
-    # Also create a simple summary text file
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(output)
+        return output[match.end():end].strip()
+    return ""
+
+
+def dataset_sizes():
+    sizes = {}
+    for key, filename in DATASETS:
+        path = os.path.join(REPO, "data", filename)
+        sizes[key] = int(len(pd.read_csv(path)))
+    return sizes
+
+
+def main():
+    results = {}
+    sizes = dataset_sizes()
+
+    for filename, models in WORKFLOWS:
+        print(f"Running workflows/{filename}...")
+        output, warnings = run_script(filename)
+        print(output)
+        if warnings.strip():
+            print("[stderr from workflow — not parsed]")
+            print(warnings)
+        accuracies = parse_accuracies(output)
+        for key, label in models:
+            if label not in accuracies:
+                raise RuntimeError(f"Could not parse '{label} Accuracy' from {filename}")
+            results[key] = {
+                "accuracy": accuracies[label],
+                "report": extract_report(output, label),
+            }
+
+    results["datasets"] = {key: {"rows": sizes[key]} for key in sizes}
+
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+    with open(os.path.join(RESULTS_DIR, "metrics.json"), "w", encoding="utf-8") as handle:
+        json.dump(results, handle, indent=2)
+        handle.write("\n")
+
     summary_lines = []
-    for key, val in results.items():
-        summary_lines.append(f"{key}: accuracy = {val['accuracy']}")
-        if val['report']:
-            summary_lines.append(val['report'])
-            summary_lines.append('')
-    with open(os.path.join(base, '../results/summary.txt'), 'w') as f:
-        f.write('\n'.join(summary_lines))
-    print('Metrics saved to results/')
+    for key, value in results.items():
+        if key == "datasets":
+            continue
+        summary_lines.append(f"{key}: accuracy = {value['accuracy']:.2f}")
+        if value["report"]:
+            summary_lines.append(value["report"])
+            summary_lines.append("")
+    with open(os.path.join(RESULTS_DIR, "summary.txt"), "w", encoding="utf-8") as handle:
+        handle.write("\n".join(summary_lines))
+
+    print("Metrics saved to results/")
+
+
+if __name__ == "__main__":
+    main()
